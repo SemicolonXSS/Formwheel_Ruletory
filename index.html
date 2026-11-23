@@ -45,4 +45,29 @@ function demo(){
 $('diagnose').onclick=diagnose;$('demo').onclick=demo;
 function stop(){clearInterval(timer);timer=null;$('run').textContent='▶ 가동'}$('run').onclick=()=>{if(timer){stop();note('일시정지')}else{start()}};$('step').onclick=()=>{tick();note('1틱 완료')};$('rotate').onclick=()=>{if(selected<0||s.cells[selected].type!=='belt'){note('컨베이어를 먼저 선택해 줘');return}s.cells[selected].dir=(s.cells[selected].dir+1)%4;placementDir=s.cells[selected].dir;syncDirections();draw();note('컨베이어 회전 완료')};$('apply').onclick=()=>{const effect=$('effect').value,condition=$('condition').value;if(s.rule.effect===effect&&s.rule.condition===condition){note('이미 적용된 규칙이야');return}const price=prices[effect];if(price<0&&s.r.coins< -price){note('코인 부족! '+(-price)+'개 필요');return}if(price<0)s.r.coins+=price;else if(price>0&&!s.claimed.includes(effect)){s.r.coins+=price;s.claimed.push(effect)}s.rule={condition,effect};stats();note('규칙 적용 완료 · '+(price<0?price+' 코인':price>0?(s.claimed.filter(x=>x===effect).length?'보상은 최초 1회만 지급':''):'기본 규칙'))};$('save').onclick=()=>{try{localStorage.setItem(KEY,JSON.stringify(s));note('저장 완료')}catch{note('저장 실패')}};$('reset').onclick=()=>{if(!confirm('모든 공장 데이터를 초기화할까?'))return;stop();s=fresh();selected=-1;lastPower=null;try{localStorage.removeItem(KEY)}catch{}$('condition').value=s.rule.condition;$('effect').value=s.rule.effect;draw();stats();note('초기화 완료')};$('condition').value=s.rule.condition;$('effect').value=s.rule.effect;window.addEventListener('pagehide',()=>{try{localStorage.setItem(KEY,JSON.stringify(s))}catch{}});draw();stats();if(s.cells.some(c=>c.type==='generator'))start();note(s.starterRecovered032?'기존 빈 공장에 시작 금속 30개와 코인을 지급했어!':'샘플 물류 라인 설치를 누르면 실제 운송을 테스트할 수 있어!');
 })();
-</script></body></html>
+</script>
+<!-- Formwheel optional game sharing: no login, tracking or database writes. -->
+<div id="fw-game-share" style="max-width:740px;margin:24px auto;padding:18px;text-align:center;background:#25203c;color:#f8f5ff;border:1px solid #655588;border-radius:16px;font:16px/1.5 system-ui,sans-serif">
+<strong>🎮 친구와 이 게임 공유하기</strong>
+<p style="margin:8px 0;color:#d5c9ef;font-size:14px">재미있었다면 친구에게 도전 링크를 보내 보세요!</p>
+<button type="button" id="fw-game-share-btn" style="cursor:pointer;padding:11px 19px;min-height:44px;border:0;border-radius:11px;background:#c5a6ff;color:#1b1230;font:700 15px system-ui,sans-serif">📤 공유하기</button>
+<a href="https://semicolonxss.github.io/Formwheel/promotion.html" style="display:inline-block;padding:10px 14px;color:#e9d8ff;text-decoration:underline">🎡 홍보 카드 · QR 만들기</a>
+<p id="fw-game-share-status" role="status" aria-live="polite" style="font-size:13px;min-height:1.5em;margin:8px 0 0;color:#f4dba8"></p>
+</div>
+<script>
+(function(){
+const button=document.getElementById('fw-game-share-btn');
+const status=document.getElementById('fw-game-share-status');
+const u=new URL(location.href);u.hash='';u.search='';
+u.searchParams.set('utm_source','formwheel_game_share');u.searchParams.set('utm_medium','friend');
+button.addEventListener('click',async function(){
+const url=u.href;
+try{
+if(navigator.share){await navigator.share({title:document.title,text:'🎮 Formwheel에서 이 게임에 도전해 봐!',url:url});return;}
+if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(url);status.textContent='링크를 복사했어요!';return;}
+status.textContent='공유 주소: '+url;
+}catch(e){if(e&&e.name==='AbortError')return;status.textContent='공유 주소: '+url;}
+});
+})();
+</script>
+</body></html>
